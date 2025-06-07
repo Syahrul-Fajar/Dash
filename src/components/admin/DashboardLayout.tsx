@@ -36,9 +36,10 @@ import {
   DollarSign,
   Heart,
   ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+  ChevronRight
+} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { SettingsFeedback } from './SettingsFeedback';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -176,29 +177,32 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className={cn(
-            "fixed inset-y-0 left-0 flex flex-col shadow-2xl",
-            sidebarWidth,
-            isDark ? "bg-gray-800" : "bg-white",
-            transitionClass,
-          )}
-        >
-          <div
-            className="flex h-16 items-center justify-between px-6"
-            style={{
-              background: "var(--gradient-bg)",
-            }}
-          >
-            <h1 className="text-xl font-bold text-white">
-              {settings.businessName}
-            </h1>
+        <div className={cn(
+          "fixed inset-y-0 left-0 flex flex-col shadow-2xl",
+          "w-72", // Always full width on mobile
+          sidebarStyleClasses,
+          transitionClass
+        )}>
+          <div className={cn(
+            "flex h-16 shrink-0 items-center px-6",
+            sidebarCollapsed ? "justify-center" : "justify-between",
+            transitionClass
+          )} style={{
+            background: 'var(--gradient-bg)'
+          }}>
+            {!sidebarCollapsed && (
+              <h1 className="text-xl font-bold text-white truncate">
+                {settings.businessName}
+              </h1>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={() => setSidebarOpen(false)}
+              className="text-white hover:bg-white/20 shrink-0"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
-              <X className="h-5 w-5" />
+              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
           <nav className="flex-1 px-6 py-6 space-y-1">
@@ -217,18 +221,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                       : isDark
                         ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                         : "text-gray-700 hover:bg-gray-100",
-                    !sidebarCollapsed && "justify-start",
-                    sidebarCollapsed && "justify-center",
+                    "justify-start" // Always show full on mobile
                   )}
-                  style={isActive ? { background: "var(--gradient-bg)" } : {}}
+                  style={isActive ? { background: 'var(--gradient-bg)' } : {}}
                   onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
-                  {!sidebarCollapsed && <span>{item.name}</span>}
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
+        </div>
         </div>
       </div>
 
@@ -270,7 +274,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
             </Button>
           </div>
-          <nav className="flex flex-1 flex-col px-6 pb-4">
+          <nav className={cn(
+            "flex flex-1 flex-col pb-4",
+            sidebarCollapsed ? "px-2" : "px-6",
+            transitionClass
+          )}>
             <ul role="list" className="flex flex-1 flex-col gap-y-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
@@ -279,7 +287,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Link
                       to={item.href}
                       className={cn(
-                        "group flex gap-x-3 p-3 text-sm font-medium leading-6",
+                        "group flex gap-x-3 text-sm font-medium leading-6 relative",
                         borderRadiusClass,
                         transitionClass,
                         isActive
@@ -287,15 +295,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                           : isDark
                             ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                             : "text-gray-700 hover:bg-gray-100",
-                        sidebarCollapsed && "justify-center",
+                        sidebarCollapsed
+                          ? "justify-center p-3 w-12 h-12 mx-auto"
+                          : "justify-start p-3"
                       )}
-                      style={
-                        isActive ? { background: "var(--gradient-bg)" } : {}
-                      }
+                      style={isActive ? { background: 'var(--gradient-bg)' } : {}}
                       title={sidebarCollapsed ? item.name : undefined}
                     >
-                      <item.icon className="h-5 w-5 shrink-0" />
-                      {!sidebarCollapsed && <span>{item.name}</span>}
+                      <item.icon className={cn(
+                        "shrink-0",
+                        sidebarCollapsed ? "h-6 w-6" : "h-5 w-5"
+                      )} />
+                      {!sidebarCollapsed && (
+                        <span className="truncate">{item.name}</span>
+                      )}
+
+                      {/* Tooltip for collapsed state */}
+                      {sidebarCollapsed && (
+                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                          {item.name}
+                          <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-0 h-0 border-r-4 border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+                        </div>
+                      )}
                     </Link>
                   </li>
                 );
@@ -308,16 +329,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className={cn(sidebarWidthClass, transitionClass)}>
         {/* Top header */}
-        <div
-          className={cn(
-            "flex h-16 shrink-0 items-center gap-x-4 border-b px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8",
-            settings.stickyHeader ? "sticky top-0 z-40" : "",
-            isDark
-              ? "bg-gray-800/95 border-gray-700"
-              : "bg-white/95 border-gray-200",
-            "backdrop-blur-sm",
-            transitionClass,
-          )}
+        <div className={cn(
+          "flex h-16 shrink-0 items-center gap-x-4 border-b px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8",
+          settings.stickyHeader ? "sticky top-0 z-40" : "",
+          isDark
+            ? "bg-gray-800/95 border-gray-700"
+            : "bg-white/95 border-gray-200",
+          settings.stickyHeader ? "backdrop-blur-sm" : "",
+          transitionClass
+        )}>
         >
           <Button
             variant="ghost"
@@ -605,14 +625,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main
-          className={cn("py-6 lg:py-8", settings.denseTables && "py-4 lg:py-6")}
-        >
-          <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <main className={cn(
+          settings.denseTables ? "py-4 lg:py-6" : "py-6 lg:py-8",
+          transitionClass
+        )}>
+          <div className={cn(
+            "px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto",
+            settings.denseTables && "max-w-full" // Remove max-width constraint for dense tables
+          )}>
             {children}
           </div>
         </main>
       </div>
+
+      {/* Settings feedback */}
+      <SettingsFeedback />
     </div>
   );
 }
