@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import Themes from "./pages/Themes";
+import EditTheme from "./pages/EditTheme";
 import Customers from "./pages/Customers";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/themes" element={<Themes />} />
+          <Route path="/themes/edit/:id" element={<EditTheme />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
