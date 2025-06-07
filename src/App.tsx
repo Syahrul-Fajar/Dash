@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import Orders from "./pages/Orders";
 import Themes from "./pages/Themes";
+import CreateTheme from "./pages/CreateTheme";
 import EditTheme from "./pages/EditTheme";
 import Customers from "./pages/Customers";
 import Settings from "./pages/Settings";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/themes" element={<Themes />} />
+            <Route path="/themes/create" element={<CreateTheme />} />
             <Route path="/themes/edit/:id" element={<EditTheme />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/settings" element={<Settings />} />
