@@ -17,8 +17,8 @@ import {
   Eye,
   Banknote,
   Clock,
-  CheckCircle
-} from 'lucide-react';
+  CheckCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -48,13 +48,12 @@ const Dashboard = () => {
       bgColor: "bg-green-100",
     },
     {
-      title: 'Pendapatan',
-      value: 'Rp 45.2M',
-      change: '+25%',
+      title: "Pendapatan",
+      value: "Rp 45.2M",
+      change: "+25%",
       icon: Banknote,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100'
-    }
+      color: "text-red-600",
+      bgColor: "bg-red-100",
     },
   ];
 
@@ -182,18 +181,22 @@ const Dashboard = () => {
                   </div>
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full h-20">
-                <div className="text-center">
-                  <TrendingUp className="h-6 w-6 mx-auto mb-2" />
-                  <span>Lihat Analitik</span>
-                </div>
-              </Button>
-              <Button variant="outline" className="w-full h-20">
-                <div className="text-center">
-                  <Users className="h-6 w-6 mx-auto mb-2" />
-                  <span>Manajemen User</span>
-                </div>
-              </Button>
+              <Link to="/analytics">
+                <Button variant="outline" className="w-full h-20">
+                  <div className="text-center">
+                    <TrendingUp className="h-6 w-6 mx-auto mb-2" />
+                    <span>Lihat Analitik</span>
+                  </div>
+                </Button>
+              </Link>
+              <Link to="/users">
+                <Button variant="outline" className="w-full h-20">
+                  <div className="text-center">
+                    <Users className="h-6 w-6 mx-auto mb-2" />
+                    <span>Manajemen User</span>
+                  </div>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
