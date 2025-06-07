@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,8 @@ import {
   UserPlus,
   DollarSign,
   Heart,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -104,7 +107,11 @@ const notifications = [
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { settings, isDark } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    settings.sidebarCompact,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationOpen, setNotificationOpen] = useState(false);
   const location = useLocation();
@@ -115,22 +122,48 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     e.preventDefault();
     if (searchQuery.trim()) {
       console.log("Searching for:", searchQuery);
-      // Here you would implement search functionality
     }
   };
 
   const markAsRead = (notificationId: number) => {
-    // Here you would update the notification status
     console.log("Marking notification as read:", notificationId);
   };
 
   const markAllAsRead = () => {
-    // Here you would mark all notifications as read
     console.log("Marking all notifications as read");
   };
 
+  // Dynamic styles based on theme settings
+  const sidebarWidth = sidebarCollapsed ? "w-16" : "w-72";
+  const sidebarWidthClass = sidebarCollapsed ? "lg:pl-16" : "lg:pl-72";
+
+  const borderRadiusClass = {
+    none: "rounded-none",
+    small: "rounded",
+    medium: "rounded-lg",
+    large: "rounded-xl",
+  }[settings.borderRadius];
+
+  const transitionClass =
+    settings.animationSpeed !== "none"
+      ? `transition-all duration-[var(--transition-duration)] ease-in-out`
+      : "";
+
+  const sidebarStyleClasses = {
+    default: "bg-white border-r border-gray-200",
+    modern:
+      "bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 shadow-lg",
+    minimal: "bg-white border-r border-gray-100",
+  }[settings.sidebarStyle];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className={cn(
+        "min-h-screen",
+        isDark ? "bg-gray-900" : "bg-gray-50",
+        `text-[var(--base-font-size)]`,
+      )}
+    >
       {/* Mobile sidebar overlay */}
       <div
         className={cn(
@@ -142,9 +175,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
-        <div className="fixed inset-y-0 left-0 flex w-72 flex-col bg-white shadow-2xl">
-          <div className="flex h-16 items-center justify-between px-6 bg-gradient-to-r from-red-500 to-orange-500">
-            <h1 className="text-xl font-bold text-white">Baelangan Admin</h1>
+        <div
+          className={cn(
+            "fixed inset-y-0 left-0 flex flex-col shadow-2xl",
+            sidebarWidth,
+            isDark ? "bg-gray-800" : "bg-white",
+            transitionClass,
+          )}
+        >
+          <div
+            className="flex h-16 items-center justify-between px-6"
+            style={{
+              background: "var(--gradient-bg)",
+            }}
+          >
+            <h1 className="text-xl font-bold text-white">
+              {settings.businessName}
+            </h1>
             <Button
               variant="ghost"
               size="sm"
@@ -162,15 +209,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-3 text-sm font-medium",
+                    borderRadiusClass,
+                    transitionClass,
                     isActive
-                      ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg"
-                      : "text-gray-700 hover:bg-gray-100 hover:scale-[1.02]",
+                      ? "text-white shadow-lg"
+                      : isDark
+                        ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        : "text-gray-700 hover:bg-gray-100",
+                    !sidebarCollapsed && "justify-start",
+                    sidebarCollapsed && "justify-center",
                   )}
+                  style={isActive ? { background: "var(--gradient-bg)" } : {}}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  {!sidebarCollapsed && <span>{item.name}</span>}
                 </Link>
               );
             })}
@@ -179,10 +233,42 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 shadow-sm">
-          <div className="flex h-16 shrink-0 items-center px-6 bg-gradient-to-r from-red-500 to-orange-500">
-            <h1 className="text-xl font-bold text-white">Baelangan Admin</h1>
+      <div
+        className={cn(
+          "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col",
+          sidebarWidth,
+        )}
+      >
+        <div
+          className={cn(
+            "flex grow flex-col gap-y-5 overflow-y-auto shadow-sm",
+            sidebarStyleClasses,
+            transitionClass,
+          )}
+        >
+          <div
+            className="flex h-16 shrink-0 items-center justify-between px-6"
+            style={{
+              background: "var(--gradient-bg)",
+            }}
+          >
+            {!sidebarCollapsed && (
+              <h1 className="text-xl font-bold text-white">
+                {settings.businessName}
+              </h1>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/20"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-4 w-4" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </Button>
           </div>
           <nav className="flex flex-1 flex-col px-6 pb-4">
             <ul role="list" className="flex flex-1 flex-col gap-y-1">
@@ -193,14 +279,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <Link
                       to={item.href}
                       className={cn(
-                        "group flex gap-x-3 rounded-xl p-3 text-sm font-medium leading-6 transition-all duration-200",
+                        "group flex gap-x-3 p-3 text-sm font-medium leading-6",
+                        borderRadiusClass,
+                        transitionClass,
                         isActive
-                          ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg"
-                          : "text-gray-700 hover:bg-gray-100 hover:scale-[1.02]",
+                          ? "text-white shadow-lg"
+                          : isDark
+                            ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                            : "text-gray-700 hover:bg-gray-100",
+                        sidebarCollapsed && "justify-center",
                       )}
+                      style={
+                        isActive ? { background: "var(--gradient-bg)" } : {}
+                      }
+                      title={sidebarCollapsed ? item.name : undefined}
                     >
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {item.name}
+                      {!sidebarCollapsed && <span>{item.name}</span>}
                     </Link>
                   </li>
                 );
@@ -211,9 +306,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <div className={cn(sidebarWidthClass, transitionClass)}>
         {/* Top header */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div
+          className={cn(
+            "flex h-16 shrink-0 items-center gap-x-4 border-b px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8",
+            settings.stickyHeader ? "sticky top-0 z-40" : "",
+            isDark
+              ? "bg-gray-800/95 border-gray-700"
+              : "bg-white/95 border-gray-200",
+            "backdrop-blur-sm",
+            transitionClass,
+          )}
+        >
           <Button
             variant="ghost"
             size="sm"
@@ -231,7 +336,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <Search className="pointer-events-none absolute left-3 h-5 w-5 text-gray-400" />
               <Input
-                className="block h-10 w-full border-gray-300 bg-white pl-10 pr-3 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 rounded-lg"
+                className={cn(
+                  "block h-10 w-full pl-10 pr-3 focus:ring-2 focus:border-opacity-0",
+                  borderRadiusClass,
+                  isDark
+                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder:text-gray-400 focus:ring-gray-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-400",
+                  transitionClass,
+                )}
+                style={{
+                  focusRingColor: "var(--primary-color)",
+                  borderColor: isDark ? "#4b5563" : "#d1d5db",
+                }}
                 placeholder="Cari pesanan, tema, atau pelanggan..."
                 type="search"
                 value={searchQuery}
@@ -249,27 +365,51 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="relative hover:bg-gray-100 transition-colors"
+                    className={cn(
+                      "relative transition-colors",
+                      isDark ? "hover:bg-gray-700" : "hover:bg-gray-100",
+                    )}
                   >
-                    <Bell className="h-5 w-5 text-gray-600" />
+                    <Bell
+                      className={cn(
+                        "h-5 w-5",
+                        isDark ? "text-gray-300" : "text-gray-600",
+                      )}
+                    />
                     {unreadCount > 0 && (
-                      <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 p-0 text-xs text-white flex items-center justify-center">
+                      <Badge
+                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs text-white flex items-center justify-center"
+                        style={{ backgroundColor: "var(--primary-color)" }}
+                      >
                         {unreadCount}
                       </Badge>
                     )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
-                  <Card className="border-0 shadow-lg">
+                  <Card
+                    className={cn(
+                      "border-0 shadow-lg",
+                      isDark ? "bg-gray-800" : "bg-white",
+                    )}
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">Notifikasi</CardTitle>
+                        <CardTitle
+                          className={cn(
+                            "text-lg",
+                            isDark ? "text-gray-100" : "text-gray-900",
+                          )}
+                        >
+                          Notifikasi
+                        </CardTitle>
                         {unreadCount > 0 && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={markAllAsRead}
-                            className="text-xs text-red-600 hover:text-red-700"
+                            className="text-xs hover:text-opacity-80"
+                            style={{ color: "var(--primary-color)" }}
                           >
                             Tandai semua dibaca
                           </Button>
@@ -284,16 +424,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             <div
                               key={notification.id}
                               className={cn(
-                                "flex items-start gap-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors border-l-4",
+                                "flex items-start gap-3 p-4 cursor-pointer transition-colors border-l-4",
+                                isDark
+                                  ? "hover:bg-gray-700"
+                                  : "hover:bg-gray-50",
                                 notification.unread
-                                  ? "bg-blue-50/50 border-l-blue-500"
+                                  ? isDark
+                                    ? "bg-gray-700/50 border-l-blue-400"
+                                    : "bg-blue-50/50 border-l-blue-500"
                                   : "border-l-transparent",
                               )}
                               onClick={() => markAsRead(notification.id)}
                             >
                               <div
                                 className={cn(
-                                  "rounded-full p-2 bg-gray-100",
+                                  "rounded-full p-2",
+                                  isDark ? "bg-gray-600" : "bg-gray-100",
                                   notification.color,
                                 )}
                               >
@@ -303,20 +449,38 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <div className="flex items-center gap-2">
                                   <p
                                     className={cn(
-                                      "text-sm font-medium text-gray-900",
+                                      "text-sm font-medium",
+                                      isDark
+                                        ? "text-gray-100"
+                                        : "text-gray-900",
                                       notification.unread && "font-semibold",
                                     )}
                                   >
                                     {notification.title}
                                   </p>
                                   {notification.unread && (
-                                    <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                                    <div
+                                      className="h-2 w-2 rounded-full"
+                                      style={{
+                                        backgroundColor: "var(--primary-color)",
+                                      }}
+                                    />
                                   )}
                                 </div>
-                                <p className="text-sm text-gray-600 mt-1">
+                                <p
+                                  className={cn(
+                                    "text-sm mt-1",
+                                    isDark ? "text-gray-300" : "text-gray-600",
+                                  )}
+                                >
                                   {notification.message}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                                <p
+                                  className={cn(
+                                    "text-xs mt-1 flex items-center gap-1",
+                                    isDark ? "text-gray-400" : "text-gray-400",
+                                  )}
+                                >
                                   <Clock className="h-3 w-3" />
                                   {notification.time}
                                 </p>
@@ -330,40 +494,74 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </PopoverContent>
               </Popover>
 
-              <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-300" />
+              <div
+                className={cn(
+                  "hidden lg:block lg:h-6 lg:w-px",
+                  isDark ? "bg-gray-600" : "bg-gray-300",
+                )}
+              />
 
               {/* Profile */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center gap-x-3 hover:bg-gray-100 transition-colors p-2"
+                    className={cn(
+                      "flex items-center gap-x-3 transition-colors p-2",
+                      isDark ? "hover:bg-gray-700" : "hover:bg-gray-100",
+                    )}
                   >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                    <div
+                      className="h-8 w-8 rounded-full flex items-center justify-center"
+                      style={{ background: "var(--gradient-bg)" }}
+                    >
                       <span className="text-sm font-semibold text-white">
                         A
                       </span>
                     </div>
-                    <span className="hidden lg:block text-sm font-semibold text-gray-900">
+                    <span
+                      className={cn(
+                        "hidden lg:block text-sm font-semibold",
+                        isDark ? "text-gray-100" : "text-gray-900",
+                      )}
+                    >
                       Admin
                     </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-0" align="end">
-                  <Card className="border-0 shadow-lg">
+                  <Card
+                    className={cn(
+                      "border-0 shadow-lg",
+                      isDark ? "bg-gray-800" : "bg-white",
+                    )}
+                  >
                     <CardContent className="p-0">
-                      <div className="p-4 border-b">
+                      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                          <div
+                            className="h-10 w-10 rounded-full flex items-center justify-center"
+                            style={{ background: "var(--gradient-bg)" }}
+                          >
                             <span className="text-sm font-semibold text-white">
                               A
                             </span>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p
+                              className={cn(
+                                "font-medium",
+                                isDark ? "text-gray-100" : "text-gray-900",
+                              )}
+                            >
                               Administrator
                             </p>
-                            <p className="text-sm text-gray-500">
+                            <p
+                              className={cn(
+                                "text-sm",
+                                isDark ? "text-gray-400" : "text-gray-500",
+                              )}
+                            >
                               admin@baelangan.com
                             </p>
                           </div>
@@ -373,7 +571,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         <Link to="/settings">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start gap-2 text-gray-700"
+                            className={cn(
+                              "w-full justify-start gap-2",
+                              isDark
+                                ? "text-gray-300 hover:bg-gray-700"
+                                : "text-gray-700 hover:bg-gray-100",
+                            )}
                           >
                             <Settings className="h-4 w-4" />
                             Pengaturan
@@ -381,7 +584,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         </Link>
                         <Button
                           variant="ghost"
-                          className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className={cn(
+                            "w-full justify-start gap-2 hover:text-opacity-80",
+                            isDark
+                              ? "text-red-400 hover:bg-red-900/20"
+                              : "text-red-600 hover:bg-red-50",
+                          )}
                           onClick={() => console.log("Logout clicked")}
                         >
                           <LogOut className="h-4 w-4" />
@@ -397,7 +605,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="py-6 lg:py-8">
+        <main
+          className={cn("py-6 lg:py-8", settings.denseTables && "py-4 lg:py-6")}
+        >
           <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             {children}
           </div>
