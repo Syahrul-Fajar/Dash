@@ -33,7 +33,7 @@ import {
   CheckCircle,
   AlertTriangle,
   UserPlus,
-  DollarSign,
+  Banknote,
   Heart,
   ChevronLeft,
   ChevronRight,
@@ -72,7 +72,7 @@ const notifications = [
     message: "Pembayaran Rp 199K dari Dika & Rina telah dikonfirmasi",
     time: "15 menit lalu",
     unread: true,
-    icon: DollarSign,
+    icon: Banknote,
     color: "text-green-600",
   },
   {

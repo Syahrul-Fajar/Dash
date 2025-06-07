@@ -15,10 +15,10 @@ import {
   Users,
   TrendingUp,
   Eye,
-  DollarSign,
+  Banknote,
   Clock,
-  CheckCircle,
-} from "lucide-react";
+  CheckCircle
+} from 'lucide-react';
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -48,12 +48,13 @@ const Dashboard = () => {
       bgColor: "bg-green-100",
     },
     {
-      title: "Pendapatan",
-      value: "Rp 45.2M",
-      change: "+25%",
-      icon: DollarSign,
-      color: "text-red-600",
-      bgColor: "bg-red-100",
+      title: 'Pendapatan',
+      value: 'Rp 45.2M',
+      change: '+25%',
+      icon: Banknote,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100'
+    }
     },
   ];
 

@@ -35,7 +35,7 @@ import {
   Phone,
   Mail,
   Calendar,
-  DollarSign,
+  Banknote,
   User,
   MapPin,
 } from "lucide-react";
@@ -379,7 +379,7 @@ const Orders = () => {
                                   <Card>
                                     <CardHeader>
                                       <CardTitle className="text-lg flex items-center gap-2">
-                                        <DollarSign className="h-5 w-5" />
+                                        <Banknote className="h-5 w-5" />
                                         Detail Pesanan
                                       </CardTitle>
                                     </CardHeader>

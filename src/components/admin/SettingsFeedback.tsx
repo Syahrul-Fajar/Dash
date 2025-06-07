@@ -1,45 +1,87 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles } from "lucide-react";
 
 export function SettingsFeedback() {
   const { settings } = useTheme();
-  const [changes, setChanges] = useState<string[]>([]);
+  const location = useLocation();
   const [showFeedback, setShowFeedback] = useState(false);
+  const [lastChange, setLastChange] = useState("");
+  const previousSettings = useRef(settings);
+  const isInitialLoad = useRef(true);
 
-  // Track setting changes
+  // Track actual setting changes, not just navigation
   useEffect(() => {
-    const newChanges = [];
-
-    if (settings.sidebarCompact) {
-      newChanges.push("Sidebar Compact diaktifkan");
-    }
-    if (settings.stickyHeader) {
-      newChanges.push("Sticky Header diaktifkan");
-    }
-    if (settings.denseTables) {
-      newChanges.push("Dense Tables diaktifkan");
-    }
-    if (settings.autoHideSidebar) {
-      newChanges.push("Auto-hide Sidebar diaktifkan");
+    // Skip initial load
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      previousSettings.current = settings;
+      return;
     }
 
-    newChanges.push(`Mode: ${settings.mode}`);
-    newChanges.push(`Accent Color: ${settings.accentColor}`);
-    newChanges.push(`Font Size: ${settings.fontSize}`);
-    newChanges.push(`Border Radius: ${settings.borderRadius}`);
-    newChanges.push(`Animation Speed: ${settings.animationSpeed}`);
-    newChanges.push(`Sidebar Style: ${settings.sidebarStyle}`);
+    // Only show feedback if we're on the settings page
+    if (location.pathname !== "/settings") {
+      return;
+    }
 
-    setChanges(newChanges);
+    // Check for actual changes in settings
+    const changes = [];
+    const prev = previousSettings.current;
 
-    // Show feedback briefly when settings change
-    setShowFeedback(true);
-    const timer = setTimeout(() => setShowFeedback(false), 3000);
-    return () => clearTimeout(timer);
-  }, [settings]);
+    if (prev.sidebarCompact !== settings.sidebarCompact) {
+      changes.push(
+        `Sidebar Compact ${settings.sidebarCompact ? "diaktifkan" : "dinonaktifkan"}`,
+      );
+    }
+    if (prev.stickyHeader !== settings.stickyHeader) {
+      changes.push(
+        `Sticky Header ${settings.stickyHeader ? "diaktifkan" : "dinonaktifkan"}`,
+      );
+    }
+    if (prev.denseTables !== settings.denseTables) {
+      changes.push(
+        `Dense Tables ${settings.denseTables ? "diaktifkan" : "dinonaktifkan"}`,
+      );
+    }
+    if (prev.autoHideSidebar !== settings.autoHideSidebar) {
+      changes.push(
+        `Auto-hide Sidebar ${settings.autoHideSidebar ? "diaktifkan" : "dinonaktifkan"}`,
+      );
+    }
+    if (prev.mode !== settings.mode) {
+      changes.push(`Mode diubah ke ${settings.mode}`);
+    }
+    if (prev.accentColor !== settings.accentColor) {
+      changes.push(`Warna aksen diubah ke ${settings.accentColor}`);
+    }
+    if (prev.fontSize !== settings.fontSize) {
+      changes.push(`Ukuran font diubah ke ${settings.fontSize}`);
+    }
+    if (prev.borderRadius !== settings.borderRadius) {
+      changes.push(`Border radius diubah ke ${settings.borderRadius}`);
+    }
+    if (prev.animationSpeed !== settings.animationSpeed) {
+      changes.push(`Kecepatan animasi diubah ke ${settings.animationSpeed}`);
+    }
+    if (prev.sidebarStyle !== settings.sidebarStyle) {
+      changes.push(`Gaya sidebar diubah ke ${settings.sidebarStyle}`);
+    }
+
+    // Only show feedback if there were actual changes
+    if (changes.length > 0) {
+      setLastChange(changes[0]); // Show the first change
+      setShowFeedback(true);
+      const timer = setTimeout(() => setShowFeedback(false), 2000);
+
+      // Update previous settings
+      previousSettings.current = settings;
+
+      return () => clearTimeout(timer);
+    }
+  }, [settings, location.pathname]);
 
   if (!showFeedback) return null;
 
@@ -60,7 +102,7 @@ export function SettingsFeedback() {
             <span className="font-medium text-sm">Pengaturan Diterapkan</span>
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            Perubahan telah disimpan dan diterapkan secara real-time
+            {lastChange}
           </div>
           <div className="flex items-center gap-1 mt-2">
             <Check className="h-3 w-3 text-green-600" />
